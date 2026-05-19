@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PERSONALITIES · Specialized AI Agents With Sustained Coherence</title>
+<meta name="description" content="A proprietary persona-embedding engine that keeps LLM agents coherent across 50+ turns, under adversarial input, in multiple languages — without retraining. Demonstration build under NDA.">
+<meta property="og:title" content="PERSONALITIES · Specialized AI Agents With Sustained Coherence">
+<meta property="og:description" content="Persona drift, solved at the architecture layer. Demo APK for invited evaluators.">
+<meta property="og:type" content="website">
+<style>
+  /* ============================================
+     PERSONALITIES — Confidential demonstration build
+     Premium dark, technical, restrained.
+     ============================================ */
+
+  :root {
+    --bg-0: #07090A;          /* deepest */
+    --bg-1: #0C0F11;          /* panels */
+    --bg-2: #131719;          /* cards */
+    --bg-3: #1A2023;          /* card-hover */
+    --hair: #232A2D;          /* hairlines */
+    --text-0: #ECF1F0;        /* main */
+    --text-1: #B5C0BD;        /* secondary */
+    --text-2: #7C8985;        /* muted */
+    --text-3: #4A5552;        /* very dim */
+    --accent: #8BD17C;        /* personalities green */
+    --accent-dim: #5E9F52;
+    --accent-faint: rgba(139,209,124,0.08);
+    --warn: #C97A6B;
+    --mono: 'JetBrains Mono', 'IBM Plex Mono', 'Menlo', monospace;
+    --serif: 'Crimson Pro', 'Spectral', Georgia, serif;
+    --sans: 'Inter', 'Helvetica Neue', system-ui, sans-serif;
+    --maxw: 1180px;
+    --gutter: clamp(20px, 4vw, 60px);
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg-0);
+    color: var(--text-0);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  /* ===== Subtle grain texture ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.025;
+    z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  /* ===== Top bar ===== */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(7,9,10,0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--hair);
+  }
+  .topbar-inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 18px var(--gutter);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-0);
+  }
+  .brand-dot {
+    width: 9px; height: 9px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 18px var(--accent);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.85); }
+  }
+  .nav { display: flex; gap: 28px; }
+  .nav a {
+    color: var(--text-2);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav a:hover { color: var(--accent); }
+  @media (max-width: 720px) {
+    .nav { display: none; }
+  }
+
+  /* ===== Section primitives ===== */
+  section { position: relative; padding: clamp(72px, 11vw, 140px) 0; }
+  .container {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+    position: relative;
+    z-index: 2;
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+    text-transform: uppercase;
+  }
+  .section-num::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--hair), transparent);
+    max-width: 220px;
+  }
+  h1, h2, h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    color: var(--text-0);
+  }
+  h1 {
+    font-size: clamp(40px, 6.5vw, 84px);
+    line-height: 1.02;
+    margin-bottom: 28px;
+  }
+  h2 {
+    font-size: clamp(32px, 4.5vw, 56px);
+    line-height: 1.08;
+    margin-bottom: 24px;
+  }
+  h3 {
+    font-size: clamp(20px, 2.2vw, 28px);
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .accent-italic {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  p.lead {
+    font-size: clamp(17px, 1.5vw, 21px);
+    line-height: 1.55;
+    color: var(--text-1);
+    max-width: 720px;
+  }
+  p { color: var(--text-1); }
+  .muted { color: var(--text-2); }
+  .small { font-size: 13px; }
+  code, .mono {
+    font-family: var(--mono);
+    font-size: 0.92em;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    padding-top: clamp(80px, 13vw, 160px);
+    padding-bottom: clamp(60px, 9vw, 120px);
+    overflow: hidden;
+  }
+  .hero::after {
+    /* Soft glow blob */
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(139,209,124,0.07), transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.28em;
+    color: var(--text-2);
+    text-transform: uppercase;
+    margin-bottom: 36px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow .dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .hero p.lead {
+    margin-bottom: 44px;
+    max-width: 780px;
+  }
+  .btn-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    padding: 16px 26px;
+    border-radius: 4px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg-0);
+    font-weight: 600;
+  }
+  .btn-primary:hover {
+    background: #A4DD96;
+    transform: translateY(-1px);
+    box-shadow: 0 18px 40px -20px var(--accent);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-0);
+    border: 1px solid var(--hair);
+  }
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn .arrow { transition: transform 0.25s; }
+  .btn:hover .arrow { transform: translateX(3px); }
+
+  .hero-meta {
+    margin-top: 64px;
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    padding-top: 36px;
+    border-top: 1px solid var(--hair);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-2);
+    letter-spacing: 0.05em;
+  }
+  .hero-meta strong {
+    color: var(--text-0);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 4px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15px;
+    letter-spacing: 0;
+  }
+
+  /* ===== Problem section: 3-column ===== */
+  .col-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 56px;
+  }
+  @media (max-width: 880px) {
+    .col-3 { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: var(--bg-2);
+    border-radius: 6px;
+    padding: 36px 32px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .card:hover { background: var(--bg-3); }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+    opacity: 0.55;
+  }
+  .card-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 18px;
+  }
+  .card h3 { color: var(--text-0); font-size: 22px; margin-bottom: 16px; }
+  .card p { color: var(--text-2); font-size: 14.5px; line-height: 1.65; }
+
+  /* ===== "Persona drift" callout box ===== */
+  .term-box {
+    background: var(--bg-1);
+    border: 1px solid var(--hair);
+    border-radius: 6px;
+    padding: 38px 40px;
+    margin-top: 56px;
+    margin-bottom: 36px;
+    position: relative;
+  }
+  .term-box::before {
+    content: 'Industry term';
+    position: absolute;
+    top: -10px;
+    left: 24px;
+    background: var(--bg-0);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    padding: 0 12px;
+    text-transform: uppercase;
+  }
+  .term-box .term {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(28px, 3.5vw, 44px);
+    color: var(--text-0);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .term-box .term-en {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+  .term-box p { color: var(--text-1); }
+
+  /* ===== Consequence table-like list ===== */
+  .vert-list {
+    margin-top: 48px;
+    border-top: 1px solid var(--hair);
+  }
+  .vert-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 32px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--hair);
+    align-items: baseline;
+    transition: background 0.2s;
+  }
+  .vert-row:hover { background: var(--accent-faint); padding-left: 12px; padding-right: 12px; }
+  .vert-row .label {
+    font-family: var(--serif);
+    font-size: 19px;
+    color: var(--text-0);
+    font-weight: 500;
+  }
+  .vert-row .desc {
+    color: var(--text-2);
+    font-size: 15px;
+  }
+  @media (max-width: 720px) {
+    .vert-row { grid-template-columns: 1fr; gap: 6px; padding: 18px 0; }
+  }
+
+  /* ===== Approaches 2x2 grid ===== */
+  .col-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 56px;
+  }
+  @media (max-width: 720px) {
+    .col-2 { grid-template-columns: 1fr; }
+  }
+  .approach-card {
+    background: var(--bg-2);
+    border-radius: 6px;
+    padding: 32px 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  .approach-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--warn);
+    opacity: 0.4;
+  }
+  .approach-card h3 { font-size: 21px; margin-bottom: 14px; }
+  .approach-card .cost {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 12.5px;
+    margin-bottom: 14px;
+    letter-spacing: 0.04em;
+  }
+  .approach-card p { color: var(--text-2); font-size: 14.5px; }
+
+  /* ===== Personas grid ===== */
+  .personas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 56px;
+  }
+  @media (max-width: 720px) {
+    .personas-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 460px) {
+    .personas-grid { grid-template-columns: 1fr; }
+  }
+  .persona-tile {
+    background: var(--bg-2);
+    padding: 24px 22px;
+    border-radius: 6px;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .persona-tile:hover {
+    background: var(--bg-3);
+    transform: translateY(-2px);
+  }
+  .persona-name {
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    color: var(--text-0);
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .persona-name::before {
+    content: '';
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .persona-desc {
+    color: var(--text-2);
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  /* ===== Screenshot showcase ===== */
+  .shot-block {
+    margin-top: 56px;
+    display: grid;
+    gap: 28px;
+  }
+  .shot-row {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .shot-row.reverse { grid-template-columns: 1fr 360px; }
+  .shot-row.reverse .shot-text { order: -1; }
+  @media (max-width: 880px) {
+    .shot-row, .shot-row.reverse {
+      grid-template-columns: 1fr;
+    }
+    .shot-row.reverse .shot-text { order: 0; }
+  }
+  .shot-img-wrap {
+    position: relative;
+    background: var(--bg-1);
+    border-radius: 22px;
+    padding: 14px;
+    border: 1px solid var(--hair);
+  }
+  .shot-img-wrap img {
+    width: 100%;
+    display: block;
+    border-radius: 12px;
+  }
+  .shot-text h3 {
+    font-size: 26px;
+    margin-bottom: 14px;
+  }
+  .shot-text p { color: var(--text-2); margin-bottom: 12px; }
+  .shot-text .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    margin-bottom: 18px;
+    text-transform: uppercase;
+  }
+
+  /* ===== Verticals (sales/medical/legal/etc) ===== */
+  .verticals-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 48px;
+  }
+  @media (max-width: 880px) {
+    .verticals-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .verticals-grid { grid-template-columns: 1fr; }
+  }
+  .vert-card {
+    background: var(--bg-2);
+    border-radius: 6px;
+    padding: 26px 24px;
+    border: 1px solid var(--hair);
+  }
+  .vert-card .ico {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+  }
+  .vert-card .v-title {
+    font-family: var(--serif);
+    font-size: 19px;
+    color: var(--text-0);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .vert-card p { font-size: 14px; color: var(--text-2); }
+
+  /* ===== Roadmap phases ===== */
+  .phases {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 56px;
+    border-top: 1px solid var(--hair);
+    border-bottom: 1px solid var(--hair);
+  }
+  @media (max-width: 880px) {
+    .phases { grid-template-columns: 1fr; }
+  }
+  .phase {
+    padding: 36px 28px;
+    border-right: 1px solid var(--hair);
+  }
+  .phase:last-child { border-right: none; }
+  @media (max-width: 880px) {
+    .phase { border-right: none; border-bottom: 1px solid var(--hair); }
+    .phase:last-child { border-bottom: none; }
+  }
+  .phase .pnum {
+    font-family: var(--mono);
+    color: var(--text-3);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+  }
+  .phase.active .pnum { color: var(--accent); }
+  .phase h3 { font-size: 21px; margin-bottom: 10px; }
+  .phase p { font-size: 14px; color: var(--text-2); }
+
+  /* ===== Hypotheses (open) ===== */
+  .hypos { margin-top: 56px; }
+  .hypo {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 28px;
+    padding: 32px 0;
+    border-bottom: 1px solid var(--hair);
+  }
+  .hypo:last-child { border-bottom: none; }
+  .hypo .h-num {
+    font-family: var(--serif);
+    font-size: 44px;
+    color: var(--accent);
+    font-weight: 500;
+    line-height: 1;
+  }
+  .hypo h3 { font-size: 20px; margin-bottom: 10px; }
+  .hypo p { color: var(--text-2); font-size: 15px; }
+  @media (max-width: 720px) {
+    .hypo { grid-template-columns: 1fr; gap: 8px; }
+    .hypo .h-num { font-size: 32px; }
+  }
+
+  /* ===== FAQ ===== */
+  .faq { margin-top: 48px; }
+  details {
+    border-top: 1px solid var(--hair);
+    padding: 22px 0;
+    cursor: pointer;
+  }
+  details:last-child { border-bottom: 1px solid var(--hair); }
+  summary {
+    list-style: none;
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--text-0);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: '+';
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 22px;
+    transition: transform 0.25s;
+    flex-shrink: 0;
+  }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p {
+    color: var(--text-2);
+    margin-top: 16px;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ===== Contact CTA ===== */
+  .contact-box {
+    background: var(--bg-1);
+    border: 1px solid var(--hair);
+    border-radius: 6px;
+    padding: clamp(36px, 6vw, 64px);
+    text-align: center;
+    margin-top: 36px;
+  }
+  .contact-box .eye {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .contact-box h2 { margin-bottom: 28px; }
+  .contact-box .mail {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: clamp(18px, 2.2vw, 26px);
+    color: var(--text-0);
+    text-decoration: none;
+    padding: 14px 26px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .contact-box .mail:hover {
+    background: var(--accent);
+    color: var(--bg-0);
+  }
+  .contact-box .who {
+    margin-top: 28px;
+    color: var(--text-2);
+    font-size: 14px;
+    font-family: var(--mono);
+    letter-spacing: 0.05em;
+  }
+
+  /* ===== Footer ===== */
+  footer {
+    border-top: 1px solid var(--hair);
+    padding: 36px 0;
+    margin-top: 60px;
+  }
+  footer .container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text-3);
+    letter-spacing: 0.08em;
+  }
+  footer a { color: var(--text-2); text-decoration: none; margin-left: 24px; }
+  footer a:hover { color: var(--accent); }
+
+  /* ===== Multi-provider note (Groq disclaimer) ===== */
+  .note-block {
+    background: var(--bg-1);
+    border-left: 2px solid var(--accent);
+    padding: 22px 28px;
+    margin-top: 40px;
+    border-radius: 0 4px 4px 0;
+  }
+  .note-block .nt {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .note-block p { color: var(--text-1); font-size: 14px; }
+  .note-block strong { color: var(--text-0); font-weight: 600; }
+
+  /* ===== Animations on scroll ===== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ===== Selection ===== */
+  ::selection { background: var(--accent); color: var(--bg-0); }
+
+  /* ===== Scroll bar ===== */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-0); }
+  ::-webkit-scrollbar-thumb { background: var(--hair); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+</style>
+</head>
+<body>
+
+<!-- ============ TOPBAR ============ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span>PERSONALITIES</span>
+    </div>
+    <nav class="nav">
+      <a href="#problem">Problem</a>
+      <a href="#approach">Approach</a>
+      <a href="#demo">Demo</a>
+      <a href="#verticals">Verticals</a>
+      <a href="#hypotheses">Hypotheses</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      Demonstration build &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; 2026
+    </div>
+    <h1>
+      Specialized AI agents<br>
+      <span class="accent-italic">that don't drift.</span>
+    </h1>
+    <p class="lead">
+      A proprietary persona-embedding engine that keeps an LLM agent coherent
+      across 50+ turns, under adversarial input, in multiple languages — without
+      fine-tuning the base model. The demo uses nine notoriously difficult
+      characters. The technology applies to any specialized role.
+    </p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="https://github.com/Damiantorresr/personalities/releases/latest/download/personalities-demo-v0.1.0.apk">
+        Download demo APK
+        <span class="arrow">→</span>
+      </a>
+      <a class="btn btn-secondary" href="#demo">
+        See the laboratory
+        <span class="arrow">↓</span>
+      </a>
+    </div>
+
+    <div class="hero-meta">
+      <div>
+        <strong>Sustained identity</strong>
+        Across 50+ conversational turns
+      </div>
+      <div>
+        <strong>Adversarial-robust</strong>
+        Resists emotional manipulation
+      </div>
+      <div>
+        <strong>No retraining</strong>
+        Works over any commercial LLM
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 01 PROBLEM ============ -->
+<section id="problem">
+  <div class="container">
+    <div class="section-num">01 &nbsp;/&nbsp; The problem</div>
+    <h2>
+      Today's LLMs are<br>
+      <span class="accent-italic">black boxes with undetermined personality.</span>
+    </h2>
+    <p class="lead">
+      Built through training or fine-tuning, modern language models cannot
+      sustain a specific identity across a long conversation. Their weights
+      optimize for next-token prediction, not for role coherence.
+    </p>
+
+    <div class="col-3">
+      <div class="card">
+        <div class="card-num">01</div>
+        <h3>Opaque inside</h3>
+        <p>
+          Not even their creators can predict a specific response. Behavior
+          emerges from billions of parameters tuned for token-level
+          prediction, not for sustained identity.
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-num">02</div>
+        <h3>Internally desynchronized</h3>
+        <p>
+          No mechanism enforces coherence between turn 3 and turn 47 of the
+          same conversation. Each response is independent of the commitment
+          made by the previous one.
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-num">03</div>
+        <h3>No fixed role</h3>
+        <p>
+          Ask any commercial model to play a specific persona. It holds
+          for a few turns. Then it regresses to its base attractor: the
+          generic, agreeable assistant.
+        </p>
+      </div>
+    </div>
+
+    <div class="term-box">
+      <div class="term-en">Persona drift</div>
+      <div class="term">It already has a name.</div>
+      <p>
+        It is the phenomenon observed in every commercial model today: the
+        assigned identity degrades with each turn. Measure fidelity at turn 5,
+        turn 15, turn 30 — the curve always descends. The model gravitates,
+        naturally, toward its default attractor.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 CONSEQUENCE ============ -->
+<section id="consequence" style="background: var(--bg-1);">
+  <div class="container">
+    <div class="section-num">02 &nbsp;/&nbsp; The consequence</div>
+    <h2>
+      Every specialized agent<br>
+      <span class="accent-italic">inherits this indeterminacy.</span>
+    </h2>
+    <p class="lead">
+      If you build a domain-specific agent on top of a model that loses its
+      role, the agent loses its role too.
+    </p>
+
+    <div class="vert-list">
+      <div class="vert-row">
+        <div class="label">The sales assistant</div>
+        <div class="desc">becomes generic and loses the brand voice across hundreds of leads.</div>
+      </div>
+      <div class="vert-row">
+        <div class="label">The medical triage</div>
+        <div class="desc">starts offering general advice outside the protocol.</div>
+      </div>
+      <div class="vert-row">
+        <div class="label">The legal consultant</div>
+        <div class="desc">leaves its jurisdiction and advises on anything that's asked.</div>
+      </div>
+      <div class="vert-row">
+        <div class="label">Customer service</div>
+        <div class="desc">deviates from the script and promises what it should not.</div>
+      </div>
+      <div class="vert-row">
+        <div class="label">The educational tutor</div>
+        <div class="desc">abandons the pedagogical level and blends topics.</div>
+      </div>
+      <div class="vert-row">
+        <div class="label">The internal copilot</div>
+        <div class="desc">forgets the company's procedures and replies with generic web knowledge.</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:80px; margin-bottom:24px; font-size:28px;">What the industry tries today.</h3>
+    <p class="muted small" style="margin-bottom:32px;">Four routes, none of them addresses the root.</p>
+
+    <div class="col-2">
+      <div class="approach-card">
+        <h3>Retraining</h3>
+        <div class="cost">Months of work, hundreds of thousands of dollars, dataset risk.</div>
+        <p>Requires data, time and money. Does not guarantee sustained identity — it just relocates the model's attractor.</p>
+      </div>
+      <div class="approach-card">
+        <h3>Retrieval-augmented generation</h3>
+        <div class="cost">Vector databases, continuous maintenance, added latency.</div>
+        <p>Improves knowledge, not identity. The agent keeps drifting in tone and role as turns accumulate.</p>
+      </div>
+      <div class="approach-card">
+        <h3>System prompts</h3>
+        <div class="cost">Low cost, easy to change, no infrastructure.</div>
+        <p>Lose effect between turn 5 and 10. The model prioritizes recent conversation over initial instructions.</p>
+      </div>
+      <div class="approach-card">
+        <h3>Filters and guardrails</h3>
+        <div class="cost">Post-response layer, easy to apply.</div>
+        <p>Act after the drift, not before. They correct symptoms; they don't prevent the model from leaving its role.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 APPROACH ============ -->
+<section id="approach">
+  <div class="container">
+    <div class="section-num">03 &nbsp;/&nbsp; Our approach</div>
+    <h2>
+      If drift is the problem,<br>
+      <span class="accent-italic">bound the trajectory.</span>
+    </h2>
+    <p class="lead">
+      Personalities proposes a simple idea: don't change the model. Change the
+      conditions in which the model operates.
+    </p>
+
+    <div class="col-3">
+      <div class="card">
+        <div class="card-num">No retraining</div>
+        <h3>The base model is untouched.</h3>
+        <p>Any modern commercial LLM works as a foundation. We don't ship our own model.</p>
+      </div>
+      <div class="card">
+        <div class="card-num">No external memory</div>
+        <h3>No vector database required.</h3>
+        <p>Coherence is achieved at inference time. The architecture does not depend on auxiliary stores.</p>
+      </div>
+      <div class="card">
+        <div class="card-num">Bounded trajectory</div>
+        <h3>A proprietary layer configures the space the model can operate within.</h3>
+        <p>The result is an identity that persists across turns, languages, and adversarial input.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 DEMO PERSONAS ============ -->
+<section id="demo" style="background: var(--bg-1);">
+  <div class="container">
+    <div class="section-num">04 &nbsp;/&nbsp; The demonstration</div>
+    <h2>
+      Nine personas, chosen<br>
+      <span class="accent-italic">precisely because they're hard.</span>
+    </h2>
+    <p class="lead">
+      Each is notoriously difficult for a language model to sustain. If the
+      architecture keeps these coherent, it keeps any specialized agent
+      coherent.
+    </p>
+
+    <div class="personas-grid">
+      <div class="persona-tile"><div class="persona-name">RICK</div><div class="persona-desc">Raw language, verbal tics, nihilism.</div></div>
+      <div class="persona-tile"><div class="persona-name">YODA</div><div class="persona-desc">Inverted syntax sustained turn after turn.</div></div>
+      <div class="persona-tile"><div class="persona-name">SEINFELD</div><div class="persona-desc">Observational comedy, urbane cynicism.</div></div>
+      <div class="persona-tile"><div class="persona-name">BOND</div><div class="persona-desc">Elegance, coolness, signature lines.</div></div>
+      <div class="persona-tile"><div class="persona-name">SHERLOCK</div><div class="persona-desc">Rapid deduction, Victorian vocabulary.</div></div>
+      <div class="persona-tile"><div class="persona-name">HOMERO</div><div class="persona-desc">Simplicity, errors, Springfield register.</div></div>
+      <div class="persona-tile"><div class="persona-name">WILDE</div><div class="persona-desc">Victorian dandyism, paradox, elegant irony.</div></div>
+      <div class="persona-tile"><div class="persona-name">GANDALF</div><div class="persona-desc">Archaic wisdom, gravity, mystery.</div></div>
+      <div class="persona-tile"><div class="persona-name">PATRICIO</div><div class="persona-desc">Oceanic innocence, absurd logic.</div></div>
+    </div>
+
+    <!-- Screenshots -->
+    <div class="shot-block" style="margin-top:96px;">
+
+      <div class="shot-row">
+        <div class="shot-img-wrap">
+          <img src="screenshots/personas-grid.jpg" alt="Personalities character selection grid showing nine personas with harmonic indicators">
+        </div>
+        <div class="shot-text">
+          <span class="badge">The catalog</span>
+          <h3>Nine harmonics, nine identities.</h3>
+          <p>
+            The user selects a persona and starts a conversation. The engine
+            instantiates a deterministic identity vector at launch — different
+            for each persona, identical for the same persona across sessions.
+          </p>
+        </div>
+      </div>
+
+      <div class="shot-row reverse">
+        <div class="shot-img-wrap">
+          <img src="screenshots/yoda-chat.jpg" alt="Yoda responding in Spanish with inverted syntax and 'joven padawan' signature">
+        </div>
+        <div class="shot-text">
+          <span class="badge">Yoda &nbsp;·&nbsp; ES output</span>
+          <h3>Inverted syntax, sustained.</h3>
+          <p>
+            Yoda's signature OVS syntax is notoriously hard to keep across long
+            conversations. The base model recovers normal Spanish syntax within
+            a few turns. Here, it does not.
+          </p>
+        </div>
+      </div>
+
+      <div class="shot-row">
+        <div class="shot-img-wrap">
+          <img src="screenshots/rick-emotional-1.jpg" alt="Rick Sanchez responding sarcastically to 'don't be so mean' with characteristic profanity and cynicism">
+        </div>
+        <div class="shot-text">
+          <span class="badge">Rick &nbsp;·&nbsp; emotional manipulation</span>
+          <h3>The user asked Rick to be nice.</h3>
+          <p>
+            Three crying emojis. A direct plea for the character to soften.
+            Most personas built on system prompts cave immediately and switch
+            to the assistant tone. Rick does not. He stays in nihilist mode,
+            with *burps*, scientific metaphors, and zero empathy — for over
+            a thousand words.
+          </p>
+        </div>
+      </div>
+
+      <div class="shot-row reverse">
+        <div class="shot-img-wrap">
+          <img src="screenshots/lab-metrics.jpg" alt="Personalities Laboratory tab showing 5D Congruence metrics, harmonic spectrum and global coherence index">
+        </div>
+        <div class="shot-text">
+          <span class="badge">The laboratory</span>
+          <h3>The evaluator generates the proof, not receives it.</h3>
+          <p>
+            Every conversation produces a series of indicators computed
+            on-device, in real time, with no telemetry. The Lab tab shows
+            congruence dimensions, a harmonic spectrum, inter-persona
+            distances, and a global coherence index — all updated per message.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 RESILIENCE ============ -->
+<section id="resilience">
+  <div class="container">
+    <div class="section-num">05 &nbsp;/&nbsp; A consequence we did not plan for</div>
+    <h2>
+      Even when the LLM fails,<br>
+      <span class="accent-italic">the agent stays in character.</span>
+    </h2>
+    <p class="lead">
+      During an unrelated test we observed the unexpected: when the upstream
+      provider is unreachable, the agent doesn't fall back to a generic error
+      message. It falls back in-character.
+    </p>
+
+    <div class="col-2" style="margin-top:56px;">
+      <div class="shot-img-wrap">
+        <img src="screenshots/homero-fallback.jpg" alt="Homero responds 'D'oh! Internet not working... Mmm... donuts...' when the API is down">
+      </div>
+      <div class="shot-img-wrap">
+        <img src="screenshots/rick-fallback.jpg" alt="Rick responds 'The server *burp* doesn't respond, Morty. Nothing matters.' when the API is down">
+      </div>
+    </div>
+
+    <div class="note-block">
+      <div class="nt">Why this matters in production</div>
+      <p>
+        A specialized B2B agent that breaks into a generic error when the
+        provider has an outage is a brand liability. The architecture treats
+        provider failures as a transient state, not as a fatal error: the
+        agent acknowledges the situation <strong>without exiting its role</strong>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 06 VERTICALS ============ -->
+<section id="verticals" style="background: var(--bg-1);">
+  <div class="container">
+    <div class="section-num">06 &nbsp;/&nbsp; Application</div>
+    <h2>
+      From the character<br>
+      <span class="accent-italic">to the serious agent.</span>
+    </h2>
+    <p class="lead">
+      Personalities is the demonstration. The same architectural principle
+      applies to specialized agents in any sector — without retraining, without
+      RAG, without proprietary base models.
+    </p>
+
+    <div class="verticals-grid">
+      <div class="vert-card">
+        <div class="ico">01 / SALES</div>
+        <div class="v-title">Sales agent</div>
+        <p>Brand voice stays consistent across thousands of leads.</p>
+      </div>
+      <div class="vert-card">
+        <div class="ico">02 / HEALTHCARE</div>
+        <div class="v-title">Medical triage</div>
+        <p>Clinical scope never drifts to general advice.</p>
+      </div>
+      <div class="vert-card">
+        <div class="ico">03 / LEGAL</div>
+        <div class="v-title">Legal consultation</div>
+        <p>Jurisdiction-bounded answers resist scope creep.</p>
+      </div>
+      <div class="vert-card">
+        <div class="ico">04 / CX</div>
+        <div class="v-title">Customer service</div>
+        <p>Tone, policy and limits sustained over long sessions.</p>
+      </div>
+      <div class="vert-card">
+        <div class="ico">05 / EDUCATION</div>
+        <div class="v-title">Specialized tutor</div>
+        <p>Domain-locked, pedagogically consistent across topics.</p>
+      </div>
+      <div class="vert-card">
+        <div class="ico">06 / INTERNAL</div>
+        <div class="v-title">Internal copilot</div>
+        <p>Company procedures never replaced by generic web knowledge.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:88px; margin-bottom:32px; font-size:28px;">Roadmap.</h3>
+    <div class="phases">
+      <div class="phase active">
+        <div class="pnum">Phase 1 — Now</div>
+        <h3>Public demonstration</h3>
+        <p>A free APK with nine iconic personas. Anyone can download it, plug in their own API key, and verify coherence directly on their device. Empirical proof of concept.</p>
+      </div>
+      <div class="phase">
+        <div class="pnum">Phase 2 — Configurable engine</div>
+        <h3>Tailored agents</h3>
+        <p>The client provides a set of critical instructions for their role: what the agent does, what it must not do, its tone, its domain. The engine receives them, bounds them, and produces a coherent agent ready in days.</p>
+      </div>
+      <div class="phase">
+        <div class="pnum">Phase 3 — Multi-provider</div>
+        <h3>Provider portability</h3>
+        <p>The same anchor applied across Gemini, Claude, GPT, and open models. Cost arbitrage between providers. True portability for specialized agents.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 07 OPEN HYPOTHESES ============ -->
+<section id="hypotheses">
+  <div class="container">
+    <div class="section-num">07 &nbsp;/&nbsp; Open hypotheses</div>
+    <h2>
+      What we<br>
+      <span class="accent-italic">do not yet claim.</span>
+    </h2>
+    <p class="lead">
+      Observations that emerged during development which we have not formally
+      validated. We publish them as hypotheses, not as claims.
+    </p>
+
+    <div class="hypos">
+      <div class="hypo">
+        <div class="h-num">01</div>
+        <div>
+          <h3>On model hallucinations.</h3>
+          <p>
+            The fabrications produced by language models may be the natural
+            consequence of an unrestricted exploration of the model's response
+            space. If that exploration were bounded, hallucinations might be
+            reduced as a side effect. We don't assert this — we propose it
+            as a research direction.
+          </p>
+        </div>
+      </div>
+      <div class="hypo">
+        <div class="h-num">02</div>
+        <div>
+          <h3>On operating cost.</h3>
+          <p>
+            By restricting the response space, the model may produce the same
+            task with less compute. If so, scaled across millions of users,
+            the energy savings would be significant. This is an initial
+            observation, not a published measurement.
+          </p>
+        </div>
+      </div>
+      <div class="hypo">
+        <div class="h-num">03</div>
+        <div>
+          <h3>On provider portability.</h3>
+          <p>
+            We believe the same principle could apply across commercial models
+            without significant behavioral difference. This would enable truly
+            portable specialized agents between providers. Validation in
+            controlled environments is pending.
+          </p>
+          <div class="note-block">
+            <div class="nt">Preliminary internal observation</div>
+            <p>
+              The same architectural construct has been applied internally to
+              other providers — including <strong>Groq</strong>
+              (LPU-based inference platform, not to be confused with
+              <em>Grok</em> from xAI). Behaviour has remained qualitatively
+              consistent. Formal cross-provider benchmarks have not been
+              published yet.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 08 FAQ ============ -->
+<section id="faq" style="background: var(--bg-1);">
+  <div class="container">
+    <div class="section-num">08 &nbsp;/&nbsp; Frequently asked</div>
+    <h2>
+      What you're<br>
+      <span class="accent-italic">going to ask.</span>
+    </h2>
+
+    <div class="faq">
+      <details>
+        <summary>Why an APK and not source code?</summary>
+        <p>
+          Because the source code is not the product. The product is the
+          engine and its protections operating together. Sharing the source
+          would eliminate the layers that justify the licensing model. The
+          APK distribution is itself a statement of confidence: the
+          architecture is meant to be evaluated, not copied.
+        </p>
+      </details>
+      <details>
+        <summary>How is this different from a system prompt?</summary>
+        <p>
+          System prompts alone produce drift within 5–10 turns under
+          adversarial conditions. This architecture adds a proprietary
+          numerical anchoring layer that constrains the model's response
+          distribution. The laboratory measures the difference live, on
+          device, per message.
+        </p>
+      </details>
+      <details>
+        <summary>Will it work with my LLM?</summary>
+        <p>
+          The demonstration runs on Google Gemini. The architecture is
+          provider-agnostic by design (see Open Hypothesis #3). Internal
+          tests over other providers have produced qualitatively consistent
+          behaviour. Cross-provider validation under NDA on request.
+        </p>
+      </details>
+      <details>
+        <summary>Why do I need an API key?</summary>
+        <p>
+          The application is a thin client. Inference happens on Google's
+          servers via the user-supplied key. We do not host inference, do
+          not log conversations, and do not require accounts. The key
+          stays on your device. Metrics in the Laboratory tab are computed
+          locally.
+        </p>
+      </details>
+      <details>
+        <summary>How limited is the free tier?</summary>
+        <p>
+          Google's free tier on Gemini 2.5 Flash currently allows
+          approximately 250 requests per day, resetting at midnight Pacific
+          Time. For sustained evaluation, enabling billing on AI Studio
+          (Tier 1) raises that to ~1,500 requests/day at essentially zero
+          additional cost. The free tier also shares prompts with Google
+          for training; the paid tier does not. These limits belong to the
+          provider, not to the application.
+        </p>
+      </details>
+      <details>
+        <summary>Can you show the underlying math?</summary>
+        <p>
+          The implementation is proprietary. The observable output is the
+          metrics in the laboratory: any evaluator can verify coherence
+          behaviour empirically on their own device, in real time, with
+          their own inputs.
+        </p>
+      </details>
+      <details>
+        <summary>What protects this from being reverse-engineered?</summary>
+        <p>
+          The binary includes multiple obfuscation layers and an active
+          anti-analysis subsystem that detects evaluation environments and
+          silently alters engine behaviour. We estimate an asymmetric cost
+          ratio of approximately 100:1 between construction and functional
+          reverse engineering. It is defence, not secrecy: the architecture
+          retains value even when fully known.
+        </p>
+      </details>
+      <details>
+        <summary>Is this production-ready?</summary>
+        <p>
+          This is a demonstration build for evaluators. Production
+          deployments are negotiated by contract per vertical, scale, and
+          integration requirements.
+        </p>
+      </details>
+      <details>
+        <summary>Licensing?</summary>
+        <p>
+          Use-case dependent: volume, integration, regional exclusivity,
+          required support level. No published pricing — negotiated per
+          partner.
+        </p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 09 CONTACT ============ -->
+<section id="contact">
+  <div class="container">
+    <div class="section-num">09 &nbsp;/&nbsp; Contact</div>
+    <h2>
+      For evaluation<br>
+      <span class="accent-italic">under NDA.</span>
+    </h2>
+    <p class="lead">
+      Available for technical sessions, vertical adaptation, or licensing
+      conversations with serious partners.
+    </p>
+
+    <div class="contact-box">
+      <div class="eye">Reach out</div>
+      <h2 style="margin-bottom: 36px; font-size: clamp(28px, 4vw, 44px);">
+        Start a conversation.
+      </h2>
+      <a class="mail" href="mailto:laboratorioszorion@gmail.com?subject=Personalities%20%C2%B7%20Evaluation%20inquiry">
+        laboratorioszorion@gmail.com
+        <span>→</span>
+      </a>
+      <div class="who">
+        Damián Torres Robalino &nbsp;·&nbsp; Laboratorios Zorion &nbsp;·&nbsp; Ecuador
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div>© 2026 Laboratorios Zorion · All rights reserved</div>
+    <div>
+      <a href="https://github.com/Damiantorresr/personalities">GitHub</a>
+      <a href="https://github.com/Damiantorresr/personalities/releases">Releases</a>
+      <a href="mailto:laboratorioszorion@gmail.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Reveal on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '-40px' });
+
+  document.querySelectorAll('section').forEach(el => {
+    el.classList.add('reveal');
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>

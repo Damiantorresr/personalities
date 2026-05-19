@@ -1,0 +1,33 @@
+PERSONALITIES — Proprietary License
+
+Copyright (c) 2026 Damián Torres Robalino · Laboratorios Zorion
+All rights reserved.
+
+This repository hosts the public landing page and the demonstration build
+of the Personalities application. The demonstration build (APK) is
+provided "as is" for evaluation purposes only.
+
+The following are NOT granted, in whole or in part:
+
+  - The right to reverse engineer, decompile, disassemble or otherwise
+    derive the source code or internal logic of the demonstration build.
+  - The right to extract, replicate, reimplement or use any component
+    of the engine, anchoring layer or architecture for any product or
+    service, whether commercial or not.
+  - The right to redistribute, sublicense, mirror or rehost the APK or
+    its derivatives.
+  - The right to use the Personalities name, the Laboratorios Zorion
+    name, or associated visual assets for any product, service or
+    publication without prior written consent.
+
+The landing page (HTML/CSS/JS files in this repository) is provided as a
+public communication of the project and is not intended as a template
+for derivative works.
+
+For licensing inquiries, evaluation under NDA, or commercial
+collaboration, contact:
+
+    laboratorioszorion@gmail.com
+
+This license may be updated. The version published in this repository
+at the time of contact prevails.
